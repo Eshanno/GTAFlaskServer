@@ -1,0 +1,36 @@
+{% extends "/base/base.html" %}
+{% from 'bootstrap/form.html' import render_field %}
+{% block title %} GTA SERVER{% endblock %}
+
+
+
+{% block content %}
+
+<div class="container-fluid" >
+  {% include "navbars/navbar.html" %}
+  {% block navbar %}
+  {% endblock %}
+  <div class="row">
+    <div class=col-2>
+
+    </div>
+    <div class="col-7">
+      <div class="jumbotron bg-dark">
+        <h1>Welcome to SERVERNAME HERE</h1>
+        <hr class="bg-light">
+        <img class="img-fluid img rounded thumbnail" src="/../../static/underConstruction.jpg" alt="Under Construction ">
+
+      </div>
+    </div>
+    <div class="col-1">
+    </div>
+    <div class="col-2">
+      <iframe src="https://discordapp.com/widget?id=568169573581455370&theme=dark" width="250" height="400" allowtransparency="true" frameborder="0"></iframe>
+
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}
