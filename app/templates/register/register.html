@@ -1,0 +1,33 @@
+{% extends "/base/base.html" %}
+{% from 'bootstrap/form.html' import render_field %}
+{% block title %} GTAVoiceRP {% endblock %}
+
+
+
+{% block content %}
+
+<div class="container-fluid" >
+  {% include "navbars/navbar.html" %}
+  {% block navbar %}
+  {% endblock %}
+  <div class="row">
+    <div class='col-2 offset-1 bg-dark pt-2'>
+    <h2 style="text-align:center;">Sign Up </h2>
+    <hr class="bg-light">
+    <form method="post" style="text-align: center;">
+          {{ form.csrf_token() }}
+          {{ render_field(form.email) }}
+          {{ render_field(form.username) }}
+          {{ render_field(form.password) }}
+          {{ render_field(form.password2) }}
+          {{ render_field(form.submit) }}
+
+        </form>
+      <div class="pb-3"></div>
+
+  </div>
+</div>
+
+
+
+{% endblock %}

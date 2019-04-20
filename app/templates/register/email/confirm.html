@@ -1,0 +1,18 @@
+<h4>Dear {{user.username}},</h4>
+
+<p>
+Welcome to GTA VoiceRP!
+<br>
+Please click the link below to confirm your account!
+<br>
+{{url_for('auth.confirm',token=token,_external=True)}}
+</p>
+<p>
+Best Wishes,
+<br>
+<div>
+The GTA VRP Team
+
+</div>
+</p>
+<img src="https://www.upload.ee/image/9845110/Logo.png" border="0" alt="Logo.png" width='90px' height='90px'>

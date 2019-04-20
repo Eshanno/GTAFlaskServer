@@ -1,0 +1,27 @@
+{% extends "/base/base.html" %}
+{% from 'bootstrap/form.html' import render_field %}
+{% block title %} GTAVoiceRP {% endblock %}
+{% block content %}
+<div class="container-fluid" >
+   {% include "navbars/navbar.html" %}
+   {% block navbar %}
+   {% endblock %}
+   <div class="row">
+     <div class="col-2 offset-1">
+      <div class="card bg-dark" ">
+
+         <div class="card-body">
+            <h5 class="card-title">You need to confirm your account to acess this section!</h5>
+            <p class="card-text">Please click the email confirmation link. If you lost the email click the link below for another one!
+              <br>
+              <a href="{{url_for('auth.confirmed')}}">Resend Confirmation</a>
+
+
+            </p>
+            <a href="/" class="btn btn-primary">Go Back To Homepage</a>
+         </div>
+      </div>
+      </div>
+   </div>
+</div>
+{% endblock %}

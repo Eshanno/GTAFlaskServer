@@ -4,7 +4,9 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config():
 
     SECRET_KEY=os.environ['SECRET_FLASK']
-
+    EMAIL_HEADER = '[GTA Voice RP]'
+    EMAIL_ADDR = '5eshannon619@gmail.com'
+    GTAVOICERP_ADMIN = '5eshannon619@gmail.com'
     MAIL_SERVER= 'smtp.gmail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True

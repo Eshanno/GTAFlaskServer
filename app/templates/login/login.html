@@ -1,6 +1,6 @@
 {% extends "/base/base.html" %}
 {% from 'bootstrap/form.html' import render_field %}
-{% block title %} GTA SERVER{% endblock %}
+{% block title %} GTAVoiceRP {% endblock %}
 
 
 
@@ -11,7 +11,18 @@
   {% block navbar %}
   {% endblock %}
   <div class="row">
-    login
+    <div class='col-2 offset-1 bg-dark pt-2'>
+    <h2 style="text-align:center;">Log in </h2>
+    <hr class="bg-light">
+    <form method="post" style="text-align: center;">
+          {{ form.csrf_token() }}
+          {{ render_field(form.email) }}
+          {{ render_field(form.password) }}
+          {{ render_field(form.remember_me) }}
+          <a class="pr-2"href="{{url_for('auth.register')}}">Don't have an account?</a>
+          {{ render_field(form.submit) }}
+    </form>
+    <div class="pb-3"></div>
 
   </div>
 </div>
