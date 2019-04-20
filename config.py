@@ -1,6 +1,6 @@
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
-
+from flask_admin import Admin
 class Config():
 
     SECRET_KEY=os.environ['SECRET_FLASK']
@@ -12,7 +12,7 @@ class Config():
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-
+    FLASK_ADMIN_SWATCH = 'cerulean'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     def init_app(app):

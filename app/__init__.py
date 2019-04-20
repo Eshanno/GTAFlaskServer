@@ -5,6 +5,9 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from config import config
 from flask_login import LoginManager
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
+
 bootstrap=Bootstrap()
 mail=Mail()
 moment=Moment()
@@ -12,7 +15,7 @@ db=SQLAlchemy()
 from flask_login import LoginManager
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
-
+admin = Admin( name='microblog', template_mode='bootstrap3')
 
 
 
@@ -25,7 +28,13 @@ def create_app(config_name):
     moment.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
+    from .models import User,Post,Topic
+    admin.init_app(app)
+    admin.add_view(ModelView(User, db.session))
+    admin.add_view(ModelView(Post, db.session))
+    admin.add_view(ModelView(Topic, db.session))
 
+    # Add administrative views here
 
 
 

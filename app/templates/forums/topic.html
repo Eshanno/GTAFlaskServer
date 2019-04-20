@@ -1,0 +1,34 @@
+{% extends "/base/base.html" %}
+{% from 'bootstrap/form.html' import render_field %}
+{% block title %} GTAVoiceRP Forums{% endblock %}
+
+
+
+{% block content %}
+
+<div class="container-fluid" >
+  {% include "navbars/navbar.html" %}
+  {% block navbar %}
+  {% endblock %}
+  <div class="container">
+    <div class="row bg-dark" style="text-align:center;">
+      <div class="col">
+      <h1 style="text-align:left;">{{category.name}} <small>{{topic.name}}</small></h1>
+      <hr class="bg-light">
+      {% for post in posts%}
+      <div class="card bg-dark center">
+      <h5>{{post.title}}</h5>
+      <p>{{post.body}}</p>
+      <hr>
+      </div>
+      {% endfor %}
+      </div>
+
+
+
+    </div>
+</div>
+
+
+
+{% endblock %}

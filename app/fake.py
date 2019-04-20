@@ -2,7 +2,7 @@ from faker import Faker
 from random import randint
 from sqlalchemy.exc import IntegrityError
 from . import db
-from .models import User,Post,Category,Topic,Thread
+from .models import User,Post,Category,Topic
 
 def users(count=100):
     fake = Faker()
@@ -15,7 +15,7 @@ def users(count=100):
             i += 1
         except IntegrityError:
             db.session.rollback()
-def catagories(count=10):
+def categories(count=10):
     fake = Faker()
     user_count = User.query.count()
     for i in range(count):
@@ -29,34 +29,33 @@ def topics(count=100):
     category=Category.query.all()
     user_count = User.query.count()
     for i in range(count):
-        topic = Topic(name=fake.name(),category_id=category[randint(0,len(category)-1)].id)
+        topic = Topic(name=fake.name(),category_id=category[randint(-1,len(category)-1)].id)
         db.session.add(topic)
         db.session.commit()
 
-def threads(count=100):
-    fake = Faker()
-    category=Category.query.all()
-    #Category.query.all()[0].topics.all()
-    i=0
-    while i<count:
-        pickedCategory=category[randint(0,len(category)-1)]
-        if(pickedCategory.topics.all()!=[]):
-            thread = Thread(name=fake.name(),topic_id=pickedCategory.topics[randint(0,len(pickedCategory.topics.all())-1)].id)
-            db.session.add(thread)
-            db.session.commit()
-            i+=1
-
 def posts(count=100):
     fake = Faker()
-    threads=Thread.query.all()
+    topics=Topic.query.all()
     users = User.query.all()
     #Category.query.all()[0].topics.all()
     i=0
     while i<count:
-        pickedThread=threads[randint(0,len(threads)-1)].id
-        category=Thread.query.filter_by(id=pickedThread)[0].topic.category.id
-        user=users[randint(0,len(users)-1)].id
-        post = Post(title=fake.name(),body=fake.text(),thread_id=pickedThread,category_id=category,author_id=user)
+        pickedTopic=topics[randint(0,len(topics)-1)].id
+        category=Topic.query.filter_by(id=pickedTopic)[0].category.id
+        user=users[randint(-1,len(users)-1)].id
+        post = Post(title=fake.name(),body=fake.text(),topic_id=pickedTopic,category_id=category,author_id=user)
+        db.session.add(post)
+        db.session.commit()
+        i+=1
+
+
+def commentPosts(count=100):
+    fake = Faker()
+    topics=Topic.query.all()
+    users = User.query.all()
+    posts = Post.query.all()
+
+    while i<count:
         db.session.add(post)
         db.session.commit()
         i+=1

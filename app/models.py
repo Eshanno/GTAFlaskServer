@@ -1,6 +1,7 @@
 from flask_migrate import Migrate
 from flask_login import UserMixin,AnonymousUserMixin
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import backref
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -19,11 +20,7 @@ def makeForum():
         for x in topics:
             db.session.add(x)
         db.session.commit()
-    def makeThreads(tuples):
-        thread=[Thread(threadInfo[0],threadInfo[1]) for threadInfo in tuples]
-        for x in thread:
-            db.session.add(x)
-        db.session.commit()
+
 
     def makePosts(Posts):
         for x in Posts:
@@ -32,7 +29,7 @@ def makeForum():
     user=User.query.all()[0]
     makeCategories(['Ethans Main Category'])
     makeTopics([('TopicName',1)])
-    makeThreads([('ThreadName',1)])
+
     makePosts([Post('My First Post','Here is the main section of the posting',1,user.id,1)])
     post=Post.query.all()[0]
     p=Post()
@@ -181,8 +178,8 @@ class Category(db.Model):
     __tablename__ = 'categories'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
-    topics = db.relationship('Topic', backref='category', lazy='dynamic')
-    posts = db.relationship('Post', backref='category', lazy='dynamic')
+    topics = db.relationship('Topic',single_parent=True, backref=backref('category'),  cascade="all",lazy='dynamic')
+    posts = db.relationship('Post', single_parent=True, backref=backref('category'),cascade="all", lazy='dynamic')
     def __init__(self,name):
         self.name=name
 
@@ -192,20 +189,10 @@ class Topic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
-    threads = db.relationship('Thread', backref='topic', lazy='dynamic')
+    posts = db.relationship('Post', single_parent=True,backref=backref('topic'),cascade="all", lazy='dynamic')
     def __init__(self,name,category_id):
         self.name=name
         self.category_id=category_id
-
-class Thread(db.Model):
-    __tablename__ = 'threads'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64))
-    topic_id = db.Column(db.Integer, db.ForeignKey('topics.id'))
-    posts = db.relationship('Post', backref='thread', lazy='dynamic')
-    def __init__(self,name,topic_id):
-        self.name=name
-        self.topic_id=topic_id
 
 class Post(db.Model):
     __tablename__ = 'posts'
@@ -213,27 +200,27 @@ class Post(db.Model):
     title = db.Column(db.Text)
     body = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    thread_id = db.Column(db.Integer, db.ForeignKey('threads.id'))
+    topic_id = db.Column(db.Integer, db.ForeignKey('topics.id'))
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
 
     #Self Refrence
     parent_id = db.Column(db.Integer, db.ForeignKey('posts.id'),index=True)
-    parent = db.relationship(lambda: Post,remote_side=id, backref='parrent')
+    comments = db.relationship(lambda: Post,remote_side=id,single_parent=True, backref=backref('parent'),cascade="all",)
 
-    def __init__(self,title='',body='',thread_id=None,author_id=None,category_id=None):
+    def __init__(self,title='',body='',topic_id=None,author_id=None,category_id=None):
         self.title=title
         self.body=body
-        self.thread_id=thread_id
+        self.topic_id=topic_id
         self.author_id=author_id
         self.category_id=category_id
     def makeComment(self,title,body,author_id,parent):
         self.title=title
         self.body=body
         self.author_id=author_id
-        self.parent=parent
-        self.thread_id=parrent.thread_id
-        self.category_id=parrent.category_id
+        self.comments=parent
+        self.topic_id=parent.topic_id
+        self.category_id=parent.category_id
 
 
 

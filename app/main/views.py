@@ -1,7 +1,7 @@
 from flask import Flask , request, render_template, session, redirect, url_for
 from . import main
 from .. import db
-from ..models import User,Category,Topic,Thread,Post
+from ..models import User,Category,Topic,Post
 from flask_login import logout_user, login_required,login_user
 from flask_login import current_user
 from ..decorators import admin_required, permission_required
@@ -58,13 +58,16 @@ def forum():
 @main.route('/forum/<category>/<topic>')
 @login_required
 def forum_category(category,topic):
-    return category+topic
+    categoryContext=Category.query.filter_by(name=category).all()[0]
+    topic=Topic.query.filter_by(id=topic).all()[0]
+    posts=(topic.posts.all())
+    return render_template('/forums/topic.html',topic=topic,category=categoryContext,posts=posts)
 
-@main.route('/admin')
-@login_required
-@admin_required
-def for_admins_only():
-    return "For administrators!"
+#@main.route('/admin')
+#@login_required
+#@admin_required
+#def for_admins_only():
+#    return "For administrators!"
 
 
 @main.route('/user/<username>')
