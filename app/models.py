@@ -6,6 +6,52 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 from datetime import datetime
+
+##Utilities##
+
+def makeForum():
+    def makeCategories(stringList):
+        for name in stringList:
+            db.session.add(Category(name))
+        db.session.commit()
+    def makeTopics(tuples):
+        topics=[Topic(topicInfo[0],topicInfo[1]) for topicInfo in tuples]
+        for x in topics:
+            db.session.add(x)
+        db.session.commit()
+    def makeThreads(tuples):
+        thread=[Thread(threadInfo[0],threadInfo[1]) for threadInfo in tuples]
+        for x in thread:
+            db.session.add(x)
+        db.session.commit()
+
+    def makePosts(Posts):
+        for x in Posts:
+            db.session.add(x)
+        db.session.commit()
+    user=User.query.all()[0]
+    makeCategories(['Ethans Main Category'])
+    makeTopics([('TopicName',1)])
+    makeThreads([('ThreadName',1)])
+    makePosts([Post('My First Post','Here is the main section of the posting',1,user.id,1)])
+    post=Post.query.all()[0]
+    p=Post()
+    p.makeComment('My First Post','Here is the main section of the posting',user.id,post)
+    print(p.title)
+    db.session.add(p)
+    db.session.commit()
+
+#############
+
+
+
+
+
+
+
+
+
+
 class Permission:
     VIEW = 1
     COMMENT = 2
@@ -68,6 +114,8 @@ class User(UserMixin,db.Model):
     password_hash = db.Column(db.String(128))
     ##############################
 
+    #FORIGEN KEY FOR forum
+    posts = db.relationship('Post', backref='author', lazy='dynamic')
 
     ### STUFF ABOUT THE USER FOR PROFILES ##
     name = db.Column(db.String(64))
@@ -128,6 +176,68 @@ from . import login_manager
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+class Category(db.Model):
+    __tablename__ = 'categories'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64))
+    topics = db.relationship('Topic', backref='category', lazy='dynamic')
+    posts = db.relationship('Post', backref='category', lazy='dynamic')
+    def __init__(self,name):
+        self.name=name
+
+
+class Topic(db.Model):
+    __tablename__ = 'topics'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64))
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
+    threads = db.relationship('Thread', backref='topic', lazy='dynamic')
+    def __init__(self,name,category_id):
+        self.name=name
+        self.category_id=category_id
+
+class Thread(db.Model):
+    __tablename__ = 'threads'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64))
+    topic_id = db.Column(db.Integer, db.ForeignKey('topics.id'))
+    posts = db.relationship('Post', backref='thread', lazy='dynamic')
+    def __init__(self,name,topic_id):
+        self.name=name
+        self.topic_id=topic_id
+
+class Post(db.Model):
+    __tablename__ = 'posts'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.Text)
+    body = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    thread_id = db.Column(db.Integer, db.ForeignKey('threads.id'))
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
+
+    #Self Refrence
+    parent_id = db.Column(db.Integer, db.ForeignKey('posts.id'),index=True)
+    parent = db.relationship(lambda: Post,remote_side=id, backref='parrent')
+
+    def __init__(self,title='',body='',thread_id=None,author_id=None,category_id=None):
+        self.title=title
+        self.body=body
+        self.thread_id=thread_id
+        self.author_id=author_id
+        self.category_id=category_id
+    def makeComment(self,title,body,author_id,parent):
+        self.title=title
+        self.body=body
+        self.author_id=author_id
+        self.parent=parent
+        self.thread_id=parrent.thread_id
+        self.category_id=parrent.category_id
+
+
+
+
 
 
 ## MAIN
