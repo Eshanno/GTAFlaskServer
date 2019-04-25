@@ -5,7 +5,8 @@ from ..models import User,Category,Topic,Post
 from flask_login import logout_user, login_required,login_user
 from flask_login import current_user
 from ..decorators import admin_required, permission_required
-
+from flask_admin.contrib.sqla import ModelView
+from flask_admin import AdminIndexView
 
 @main.route('/home',methods=['GET','POST'])
 @main.route('/',methods=['GET','POST'])
@@ -29,23 +30,30 @@ def forum():
     categories=Category.query.all()
     print('\n\n')
     class ForumContext:
-        def __init__(self,category,someTopics,numTopics,numPosts):
+        def __init__(self,category,someTopics,numTopics,numPosts,recentPost):
             self.category=category
             self.someTopics=someTopics
             self.numTopics=numTopics
             self.numPosts=numPosts
+            self.recentPost=recentPost
 
     contextList=list()
     for category in categories:
         categoryTopics=Topic.query.filter_by(category_id = category.id).all()
         #Num topics
-        context=ForumContext(category,[],0,0)
+        context=ForumContext(category,[],0,0,[])
 
         if(categoryTopics!=[] and categoryTopics!=None):
             context.numTopics=(len(categoryTopics))
             context.someTopics=categoryTopics
+        if len(context.someTopics) > 5:
+            context.someTopics=context.someTopics[0:5]
         numPosts=(len(Post.query.filter_by(category_id=category.id).all()))
         context.numPosts=numPosts
+        if numPosts>0:
+            context.recentPost=category.posts.all()[-1].body
+            if len(context.recentPost)>55:
+                context.recentPost=context.recentPost[0:50]+'...'
 
 
         contextList.append(context)
@@ -59,8 +67,9 @@ def forum():
 @login_required
 def forum_category(category,topic):
     categoryContext=Category.query.filter_by(name=category).all()[0]
-    topic=Topic.query.filter_by(id=topic).all()[0]
-    posts=(topic.posts.all())
+    topic=Topic.query.filter_by(id=int(topic)).all()[0]
+    posts=(topic.posts.filter_by(parent=None)).all()
+    # TOO IMPLEMENT REPLYS IN ORDER
     return render_template('/forums/topic.html',topic=topic,category=categoryContext,posts=posts)
 
 #@main.route('/admin')

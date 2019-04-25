@@ -18,6 +18,7 @@ def login():
                 next = url_for('main.index')
             return redirect(next)
         flash('Invalid username or password!')
+        return redirect('/login')
 
     return render_template('login/login.html',form=form)
 
@@ -74,3 +75,31 @@ def unconfirmed():
     if current_user.is_anonymous or current_user.confirmed:
         return redirect(url_for('main.index'))
     return render_template('register/unconfirmed.html')
+
+@auth.route('/forgot_password',methods=["GET","POST"])
+def forgot_password():
+    from .forms import ForgotPasswordForm
+    form=ForgotPasswordForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        token = user.generate_reset_token()
+        send_email(user.email,'Reset Your Password!','register/email/resetPass',user=user,token=token)
+        print("\n\n HI\n\n")
+        return redirect(url_for('main.index'))
+
+    return render_template('register/forgot_password.html',form=form)
+
+@auth.route('/password_reset/<token>',methods=["GET","POST"])
+def password_reset(token):
+    from .forms import PasswordResetForm
+    form=PasswordResetForm()
+    if not current_user.is_anonymous:
+        return redirect(url_for('main.index'))
+    if form.validate_on_submit():
+        if User.reset_password(token, form.password.data):
+            db.session.commit()
+            flash("Your Password Has Been Updated.")
+            return redirect(url_for('auth.login'))
+        else:
+            return redirect(url_for('main.index'))
+    return render_template('register/reset_pass.html',form=form)

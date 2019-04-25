@@ -11,13 +11,13 @@ def easy():
     db.drop_all()
     db.create_all()
     Role.insert_roles()
-    u=User(confirmed=True,email="5eshannon619@gmail.com",username="Ethan",password="Pass")
+    u=User(confirmed=True,email="5eshannon619@gmail.com",username="Ethan",password="Pass",profile_picture='https://pbs.twimg.com/profile_images/994988604899328012/Brd4grOw_400x400.jpg')
     db.session.add(u)
     db.session.commit()
     from app import fake
     fake.users(10)
     fake.categories(5)
-    fake.topics(10)
+    fake.topics(20)
     fake.posts(250)
     print("Done")
 

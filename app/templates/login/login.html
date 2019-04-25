@@ -11,16 +11,34 @@
   {% block navbar %}
   {% endblock %}
   <div class="row">
+
     <div class='col-2 offset-1 bg-dark pt-2'>
     <h2 style="text-align:center;">Log in </h2>
     <hr class="bg-light">
     <form method="post" style="text-align: center;">
           {{ form.csrf_token() }}
           {{ render_field(form.email) }}
+          <div class="text-danger">
+          {% with messages = get_flashed_messages() %}
+             {% if messages %}
+                {% for message in messages %}
+                   {{ message }}
+                {% endfor %}
+             {% endif %}
+          {% endwith %}
+          </div>
           {{ render_field(form.password) }}
           {{ render_field(form.remember_me) }}
-          <a class="pr-2"href="{{url_for('auth.register')}}">Don't have an account?</a>
+          <div class="row">
+            <div class="col-8">
+          <div><a class=""href="{{url_for('auth.register')}}">Don't have an account?</a></div>
+          <div>
+          <a class=""href="{{url_for('auth.forgot_password')}}">Forgot your password?</a></div>
+            </div>
+            <div class="col" >
           {{ render_field(form.submit) }}
+          </div>
+          </div>
     </form>
     <div class="pb-3"></div>
 

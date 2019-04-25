@@ -64,6 +64,8 @@ class Role(db.Model):
     default = db.Column(db.Boolean, default=False, index=True)
     permissions = db.Column(db.Integer)
 
+
+
     #Perms handled with bitwise operations
     def add_permission(self, perm):
         if not self.has_permission(perm):
@@ -101,25 +103,28 @@ class Role(db.Model):
 
 class User(UserMixin,db.Model):
     __tablename__ = 'users'
-
+    def __str__(self):
+        return "{} #{}".format(self.username,self.id)
     ### INTERNAL BOOK KEEPING ###
     id = db.Column(db.Integer, primary_key=True)
     confirmed = db.Column(db.Boolean, default=False)
     email = db.Column(db.String(64), unique=True, index=True)
     username = db.Column(db.String(64), unique=True, index=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-    password_hash = db.Column(db.String(128))
+
     ##############################
 
     #FORIGEN KEY FOR forum
-    posts = db.relationship('Post', backref='author', lazy='dynamic')
+    posts = db.relationship('Post', backref='author', lazy='dynamic' ,cascade="all")
 
     ### STUFF ABOUT THE USER FOR PROFILES ##
     name = db.Column(db.String(64))
+    profile_picture=db.Column(db.Text())
     location = db.Column(db.String(64))
     about_me = db.Column(db.Text())
     member_since = db.Column(db.DateTime(), default=datetime.utcnow)
     last_seen = db.Column(db.DateTime(), default=datetime.utcnow)
+    password_hash = db.Column(db.String(128))
     ############################################
 
     def __init__(self, **kwargs):
@@ -139,10 +144,11 @@ class User(UserMixin,db.Model):
     def can(self,perm):
         return self.role is not None and self.role.has_permission(perm)
     def is_administrator(self):
-        return self.can(Permission.Administrator)
+        return self.can(Permission.ADMIN)
     def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
         return s.dumps({'confirm': self.id}).decode('utf-8')
+
     def confirm(self, token):
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
@@ -153,6 +159,22 @@ class User(UserMixin,db.Model):
             return False
         self.confirmed = True
         db.session.add(self)
+        return True
+
+    def generate_reset_token(self, expiration=3600):
+        s = Serializer(current_app.config['SECRET_KEY'], expiration)
+        return s.dumps({'reset': self.id}).decode('utf-8')
+    def reset_password(token, new_password):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token.encode('utf-8'))
+        except:
+            return False
+        user = User.query.get(data.get('reset'))
+        if user is None:
+            return False
+        user.password = new_password
+        db.session.add(user)
         return True
 
     @property
@@ -176,23 +198,25 @@ def load_user(user_id):
 
 class Category(db.Model):
     __tablename__ = 'categories'
+    def __str__(self):
+        return "{} #{}".format(self.name,self.id)
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
     topics = db.relationship('Topic',single_parent=True, backref=backref('category'),  cascade="all",lazy='dynamic')
     posts = db.relationship('Post', single_parent=True, backref=backref('category'),cascade="all", lazy='dynamic')
-    def __init__(self,name):
-        self.name=name
+
 
 
 class Topic(db.Model):
     __tablename__ = 'topics'
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
     posts = db.relationship('Post', single_parent=True,backref=backref('topic'),cascade="all", lazy='dynamic')
-    def __init__(self,name,category_id):
-        self.name=name
-        self.category_id=category_id
+
+    def __str__(self):
+        return ('{} #{}'.format(self.name,str(self.id)))
 
 class Post(db.Model):
     __tablename__ = 'posts'
@@ -207,13 +231,10 @@ class Post(db.Model):
     #Self Refrence
     parent_id = db.Column(db.Integer, db.ForeignKey('posts.id'),index=True)
     comments = db.relationship(lambda: Post,remote_side=id,single_parent=True, backref=backref('parent'),cascade="all",)
+    def __str__(self):
+        return "{} #{},by:{}".format(self.title,self.id,self.author_id)
 
-    def __init__(self,title='',body='',topic_id=None,author_id=None,category_id=None):
-        self.title=title
-        self.body=body
-        self.topic_id=topic_id
-        self.author_id=author_id
-        self.category_id=category_id
+
     def makeComment(self,title,body,author_id,parent):
         self.title=title
         self.body=body

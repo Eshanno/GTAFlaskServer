@@ -1,0 +1,20 @@
+<h4>Dear {{user.username}},</h4>
+
+<p>
+Did you request a password reset?
+<br>
+If you did click the link below to reset your password.
+<br>
+{{url_for('auth.password_reset',token=token,_external=True)}}
+<br>
+If you didn't request a password reset rest assured your account is secure.
+</p>
+<p>
+Best Wishes,
+<br>
+<div>
+The GTA VRP Team
+
+</div>
+</p>
+<img src="https://www.upload.ee/image/9845110/Logo.png" border="0" alt="Logo.png" width='90px' height='90px'>

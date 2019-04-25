@@ -14,11 +14,29 @@
     <div class="row" >
       <div class="col-8 offset-2 bg-dark">
         <div class="row border-right border-left border-top">
-          <div class="col-2 py-2 px-2 bg-light">
-            <img class="img-fluid img-thumbnail" src="/../../static/Logo.png" alt="Profile photo">
+          <div class="col-2 py-2 px-2" >
+
+            <img id="profilePic" class="img-fluid  " src="{{user.profile_picture}}" alt="Profile photo" style="display:inline; position:absolute;width:95%; height:auto; border:unset; border-style:groove; z-index:2">
+            
+            <img id="editProfilePic" class="img-fluid  " src="../static/Camera-icon.png" alt="Profile photo" onmouseover="onHoverReduceTransparency(this)" onmouseout="afterHoverReturnTransparency(this)" style="display:none; z-index:4; position:absolute; width:95%; height:auto;border:unset; border-style:groove; opacity:.75;">
+            <h4 style=" display:inline;z-index:50;position:relative; top: 50%;left: 50%;"> ah<h4>
 
             </div>
-            <div class="col-10 pt-2"><h2>{{user.username}}</h2><hr class="bg-primary">
+            <div class="col-7 pt-2"><h2>{{user.username}}</h2><h3><small>{{user.location}}</small> </h3> <hr class="bg-primary">
+              <h5>About Me</h5>
+              <p>{{user.about_me}} </p>
+              </div>
+              <div class="col-3 pt-2" >
+                {%if current_user.username==user.username %}
+                <div class="btn-grp" style="float:inline-end">
+
+                <div id="editProfileButton" class="btn bg-primary" onclick="myFunction()"> Edit Profile</div>
+                <script src="../static/js/editProfile.js" charset="utf-8"></script>
+                </div>
+                {%endif%}
+
+
+
               </div>
 
           </div>
@@ -29,7 +47,8 @@
               </div>
 
 
-            <div class="col-10">asd
+            <div class="col-10">
+
               </div>
               </div>
         </div>

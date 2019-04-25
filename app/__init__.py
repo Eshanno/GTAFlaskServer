@@ -15,7 +15,7 @@ db=SQLAlchemy()
 from flask_login import LoginManager
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
-admin = Admin( name='microblog', template_mode='bootstrap3')
+
 
 
 
@@ -28,11 +28,17 @@ def create_app(config_name):
     moment.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
-    from .models import User,Post,Topic
+    from .models import Role,User,Post,Topic,Category
+    from app.admin.views import MyModelView,MyAdminIndexView,CategoryView,TopicView,PostView,UserView
+    admin = Admin( index_view=MyAdminIndexView(),name='GTA VoiceRP Admin Longue', template_mode='bootstrap3')
     admin.init_app(app)
-    admin.add_view(ModelView(User, db.session))
-    admin.add_view(ModelView(Post, db.session))
-    admin.add_view(ModelView(Topic, db.session))
+
+
+    admin.add_view(UserView(User, db.session))
+    admin.add_view(MyModelView(Role, db.session))
+    admin.add_view(PostView(Post, db.session))
+    admin.add_view(TopicView(Topic, db.session))
+    admin.add_view(CategoryView(Category, db.session))
 
     # Add administrative views here
 
@@ -47,6 +53,7 @@ def create_app(config_name):
     #Login
     from app.auth import auth as auth_blueprint
     app.register_blueprint(auth_blueprint)
+
 
 
     return app
